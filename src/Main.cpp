@@ -1,7 +1,8 @@
-#include <iostream>
+#include "../include/SpaceInvaders.h"
 
 int main()
 {
-	std::cout << "Build done" << std::endl;
+	SpaceInvaders game;
+	game.start();
 	return 0;
 }
