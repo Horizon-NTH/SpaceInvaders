@@ -1,13 +1,14 @@
 #pragma once
 
+#include "Include.h"
 #include "Player.h"
 
-class Laser final : public Player
+class Devastator final : public Player
 {
 	class Shot;
 
 public:
-	Laser();
+	Devastator();
 
 	bool shoot() override;
 };

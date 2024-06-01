@@ -2,12 +2,12 @@
 
 #include "Player.h"
 
-class Laser final : public Player
+class Bomber final : public Player
 {
 	class Shot;
 
 public:
-	Laser();
+	Bomber();
 
 	bool shoot() override;
 };

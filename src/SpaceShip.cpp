@@ -1,26 +1,40 @@
 #include "../include/SpaceShip.h"
+#include "../include/Shot.h"
 
-SpaceShip::SpaceShip(const std::shared_ptr<hgui::kernel::Image>& shipImage,
-	unsigned int health, unsigned int shield, unsigned int level,
-	const std::tuple<unsigned int, unsigned int, std::chrono::milliseconds>& weaponStats) :
-	m_shipTexture(nullptr), m_level(level), m_health(health), m_shield(shield),
-	m_weaponStats(weaponStats), m_healthTexture(nullptr)
+SpaceShip::SpaceShip(const std::string& name, const hitbox& hitbox, const std::shared_ptr<hgui::kernel::Image>& shipImage, const unsigned int health, const unsigned int shield, const unsigned int level, const std::tuple<damage, ammo, cooldown>& weaponStats) :
+	Entity(hitbox),
+	m_health(health),
+	m_shield(shield),
+	m_level(level),
+	m_invincible(false),
+	m_weaponStats(weaponStats),
+	m_name(name)
 {
-	set_health();
-	m_shipTexture = hgui::SpriteManager::create(shipImage, 2 * shipImage->get_size(), hgui::point(0));
-	move();
+	m_shipTexture = hgui::SpriteManager::create(shipImage, m_hitbox.second, m_hitbox.first);
 }
 
-void SpaceShip::move()
+SpaceShip::~SpaceShip() = default;
+
+void SpaceShip::take_damage()
 {
-	hgui::point newPosition = hgui::MouseManager::get_position();
-	m_shipTexture->set_position(newPosition - m_shipTexture->get_size() / 2);
-	hgui::after(std::chrono::milliseconds(20), std::bind(&SpaceShip::move, this));
+	if (m_shield)
+		--m_shield;
+	else if (m_health)
+		--m_health;
+	set_texture();
 }
 
-void SpaceShip::set_health()
+bool SpaceShip::is_alive() const
 {
-	std::stringstream type;
-	type << "assets/textures/hp/health-" << m_health << '-' << m_shield << ".gif";
-	m_healthTexture = hgui::SpriteManager::create(hgui::image_loader(type.str()), hgui::size(25_em, 6_em), hgui::point(37.5_em, 94_em));
+	return m_health;
+}
+
+void SpaceShip::set_texture() const
+{
+	std::string bonus(".gif");
+	if (m_invincible)
+		bonus = "_invincible.gif";
+	else if (m_shield)
+		bonus = "_shield.gif";
+	m_shipTexture->set_texture(hgui::TextureManager::create(hgui::image_loader("assets/textures/spaceships/" + m_name + bonus)));
 }

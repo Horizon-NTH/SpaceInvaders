@@ -1,2 +1,8 @@
+.vs 
 build 
-SpaceInvaders.exe  
+FractalExplorer.exe 
+.vscode  
+cmake-build-debug
+.idea
+SpaceInvaders.exe
+SpaceInvaders
