@@ -1,38 +1,27 @@
 #!/bin/bash
 
 erase=false
-while getops ":e:-:" opt;
+for arg in "$@"
 do
-        case $opt in
-                e)
-                        erase=true
-                        ;;
-                -)
-                        case "$OPTARG" in
-                                erase)
-                                        erase=true
-                                        ;;
-                                *)
-                                        echo "Invalid option: --$OPTARG" >&2
-                                        ;;
-                        esac
-                        ;;
-                \?)
-                        echo "Invalid option: -$OPTARG" >&2
-                        ;;
-        esac
+    case $arg in
+        -e|--erase)
+        erase=true
+        ;;
+    esac
 done
 
 if [ -d "build" ]
 then
-	rm -rf build
+    rm -rf build
 fi
 mkdir build
-cd build
+cd build || exit
 cmake ..
 cmake --build .
+echo "Build completed."
 cd ..
-if [ $erase == true ]
+if [ "$erase" = true ]
 then
 	rm -rf build
+	echo "Build files erased."
 fi

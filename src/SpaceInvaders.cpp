@@ -18,6 +18,7 @@ SpaceInvaders::SpaceInvaders() :
 	//Tag creation//
 	hgui::TagManager::create_tag("background");
 	hgui::TagManager::create_tag("main_menu");
+	hgui::TagManager::create_tag("death_menu");
 	hgui::TagManager::create_tag("game");
 	//Background creation//
 	hgui::TagManager::set_current_tag("background");
@@ -33,12 +34,23 @@ SpaceInvaders::SpaceInvaders() :
 	m_font = hgui::FontManager::create("assets/fonts/space_age.ttf");
 	//Binding
 	hgui::KeyBoardManager::bind(hgui::KeyBoardAction(hgui::keys::ESCAPE, hgui::actions::PRESS), hgui::end);
+	move_background();
+	set_main_menu();
+	set_death_menu();
 }
 
 void SpaceInvaders::start()
 {
-	move_background();
-	set_main_menu();
+	auto start = [this](const hgui::keys& key, const hgui::actions& action)
+		{
+			if (action == hgui::actions::PRESS && key != hgui::keys::ESCAPE)
+			{
+				hgui::KeyBoardManager::bind_key_callback([] {});
+				start_game();
+			}
+		};
+	hgui::KeyBoardManager::bind_key_callback(start);
+
 	hgui::kernel::Widget::active({"main_menu"});
 	hgui::Renderer::draw({"background", "main_menu"});
 	hgui::Renderer::loop();
@@ -72,7 +84,6 @@ void SpaceInvaders::set_main_menu()
 	m_texts.push_back(txt1);
 	const auto txt2 = hgui::LabelManager::create("or ESCAPE to close.", hgui::point(0), m_font);
 	m_texts.push_back(txt2);
-
 	const auto sfx = hgui::ButtonManager::create(nullptr, hgui::size(10_em).set_reference(hgui::reference::HEIGHT), hgui::point(0), m_sfx.first, std::make_tuple(hgui::color("6e738d"), HGUI_COLOR_BLUE, HGUI_COLOR_BLUE), 25.f, false);
 	sfx->set_position(hgui::point(5_em, 95_em - sfx->get_size().em_height).set_reference(hgui::reference::HEIGHT));
 	const auto sfxSwitch = [=, this]
@@ -117,16 +128,26 @@ void SpaceInvaders::set_main_menu()
 		};
 	callback();
 	m_window->set_size_callback(callback);
+}
 
-	auto start = [this](const hgui::keys& key, const hgui::actions& action)
+void SpaceInvaders::set_death_menu()
+{
+	hgui::TagManager::set_current_tag("death_menu");
+	m_gameOver = hgui::SpriteManager::create(hgui::gif_loader("assets/textures/game_over.gif"), hgui::size(50_em, 20_em), hgui::point(25_em, 40_em));
+	const auto menuTexture = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/home.png"));
+	m_buttons.push_back(hgui::ButtonManager::create([this]
 		{
-			if (action == hgui::actions::PRESS && key != hgui::keys::ESCAPE)
-			{
-				hgui::KeyBoardManager::bind_key_callback([] {});
-				start_game();
-			}
-		};
-	hgui::KeyBoardManager::bind_key_callback(start);
+			m_gameOver->stop();
+			start();
+		}, hgui::size(10_em).set_reference(hgui::reference::HEIGHT), hgui::point(40_em, 65_em) - hgui::size(5_em).set_reference(hgui::reference::HEIGHT), menuTexture, std::make_tuple(hgui::color("6e738d"), HGUI_COLOR_BLUE, HGUI_COLOR_BLUE), 25.f, false));
+	const auto restartTexture = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/restart.png"));
+	m_buttons.push_back(hgui::ButtonManager::create([this]
+		{
+			m_gameOver->stop();
+			start_game();
+		}, hgui::size(10_em).set_reference(hgui::reference::HEIGHT), hgui::point(50_em, 65_em) - hgui::size(5_em).set_reference(hgui::reference::HEIGHT), restartTexture, std::make_tuple(hgui::color("6e738d"), HGUI_COLOR_BLUE, HGUI_COLOR_BLUE), 25.f, false));
+	const auto exitTexture = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/exit.png"));
+	m_buttons.push_back(hgui::ButtonManager::create(hgui::end, hgui::size(10_em).set_reference(hgui::reference::HEIGHT), hgui::point(60_em, 65_em) - hgui::size(5_em).set_reference(hgui::reference::HEIGHT), exitTexture, std::make_tuple(hgui::color("6e738d"), HGUI_COLOR_BLUE, HGUI_COLOR_BLUE), 25.f, false));
 }
 
 void SpaceInvaders::start_game()
@@ -134,6 +155,18 @@ void SpaceInvaders::start_game()
 	hgui::TagManager::set_current_tag("game");
 	hgui::CursorManager::hide();
 	m_player = std::make_shared<Laser>();
+	hgui::Renderer::set_draw_callback([this]
+		{
+			if (m_player && !m_player->is_alive())
+			{
+				m_gameOver->loop();
+				hgui::CursorManager::reveal();
+				hgui::kernel::Widget::active({"death_menu"});
+				hgui::Renderer::draw({"background", "death_menu", "game"});
+				hgui::Renderer::set_draw_callback(nullptr);
+			}
+		});
 
+	hgui::kernel::Widget::active({HGUI_TAG_MAIN});
 	hgui::Renderer::draw({"background", "game"});
 }

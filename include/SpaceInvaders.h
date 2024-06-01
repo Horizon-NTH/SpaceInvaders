@@ -20,6 +20,7 @@ private:
 	std::pair<std::shared_ptr<hgui::kernel::Texture>, std::shared_ptr<hgui::kernel::Texture>> m_music;
 	std::vector<std::shared_ptr<hgui::kernel::Label>> m_texts;
 	std::vector<std::shared_ptr<hgui::kernel::Button>> m_buttons;
+	std::shared_ptr<hgui::kernel::AnimatedSprite> m_gameOver;
 	std::string m_backgroundMovingTaskId;
 
 	unsigned int m_wave;
@@ -29,5 +30,6 @@ private:
 
 	void move_background();
 	void set_main_menu();
+	void set_death_menu();
 	void start_game();
 };
