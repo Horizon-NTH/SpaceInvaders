@@ -2,8 +2,7 @@
 #include "../include/PlazmaShot.h"
 
 Plazma::Plazma() :
-	Player("plazma", hgui::image_loader("assets/textures/spaceships/plazma.gif"), 3u, 0u, 1u,
-		std::make_tuple(1u, 2u, std::make_pair(std::chrono::milliseconds(1000), hgui::Timer())))
+	Player("plazma", 3u, 0u, 1u, std::make_tuple(1u, 2u, std::make_pair(std::chrono::milliseconds(1000), hgui::Timer())))
 {
 }
 

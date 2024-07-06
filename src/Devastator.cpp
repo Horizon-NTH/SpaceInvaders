@@ -2,8 +2,7 @@
 #include "../include/DevastatorShot.h"
 
 Devastator::Devastator() :
-	Player("devastator", hgui::image_loader("assets/textures/spaceships/devastator.gif"), 3u, 0u, 1u,
-		std::make_tuple(1u, 1u, std::make_pair(std::chrono::milliseconds(4000), hgui::Timer())))
+	Player("devastator", 3u, 0u, 1u, std::make_tuple(1u, 1u, std::make_pair(std::chrono::milliseconds(4000), hgui::Timer())))
 {
 }
 

@@ -14,7 +14,7 @@ void Bomber::Shot::has_collide()
 	const auto gif = hgui::gif_loader("assets/textures/explosions/explosion_bomber.gif");
 	const auto explosion = hgui::SpriteManager::create(gif, m_damageHitbox.second, position);
 	explosion->play();
-	hgui::kernel::GIFData::delay totalDelay = {};
+	hgui::kernel::GIFData::delay totalDelay(100);
 	for (const auto& delay : gif->get_data().pixels | std::views::values)
 		totalDelay += delay;
 	hgui::TaskManager::program(totalDelay, [explosion] {});

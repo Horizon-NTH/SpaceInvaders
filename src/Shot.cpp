@@ -1,15 +1,17 @@
+#include <utility>
+
 #include "../include/Shot.h"
 #include "../include/Player.h"
 
-SpaceShip::Shot::Shot(const hitbox& hitbox, const std::shared_ptr<hgui::kernel::Image>& shotImage, const GameObject::hitbox& damageHitbox, const hgui::point& position, const hgui::vec2& velocity):
+SpaceShip::Shot::Shot(const hitbox& hitbox, const std::shared_ptr<hgui::kernel::Image>& shotImage, GameObject::hitbox damageHitbox, hgui::point position, const hgui::vec2& velocity):
 	GameObject(hitbox),
 	m_texture(nullptr),
-	m_damageHitbox(damageHitbox),
-	m_position(position),
+	m_damageHitbox(std::move(damageHitbox)),
+	m_position(std::move(position)),
 	m_velocity(velocity)
 {
 	m_texture = hgui::SpriteManager::create(shotImage, m_hitbox.second, m_hitbox.first);
-	hgui::TaskManager::program(std::chrono::milliseconds(20), [this] { move(); });
+	m_tempID = hgui::TaskManager::program(std::chrono::milliseconds(20), [this] { move(); });
 }
 
 SpaceShip::Shot::~Shot()
@@ -36,6 +38,11 @@ void SpaceShip::Shot::move()
 	}
 }
 
+bool SpaceShip::Shot::can_damaged(const std::weak_ptr<Entity>& entity)
+{
+	return true;
+}
+
 void SpaceShip::Shot::collide()
 {
 	std::vector<std::weak_ptr<Entity>> damagedEntities;
@@ -49,7 +56,7 @@ void SpaceShip::Shot::collide()
 	{
 		for (const auto& ptr : damagedEntities)
 		{
-			if (const auto entity = ptr.lock())
+			if (const auto entity = ptr.lock(); entity && can_damaged(entity))
 				entity->take_damage();
 		}
 		has_collide();

@@ -2,8 +2,7 @@
 #include "../include/LaserShot.h"
 
 Laser::Laser() :
-	Player("laser", hgui::image_loader("assets/textures/spaceships/laser.gif"), 3u, 0u, 1u,
-		std::make_tuple(1u, 5u, std::make_pair(std::chrono::milliseconds(700), hgui::Timer())))
+	Player("laser", 3u, 0u, 1u, std::make_tuple(1u, 5u, std::make_pair(std::chrono::milliseconds(700), hgui::Timer())))
 {
 }
 

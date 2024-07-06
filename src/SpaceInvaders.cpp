@@ -1,11 +1,12 @@
 #include "../include/SpaceInvaders.h"
 #include "../include/Laser.h"
 #include "../include/Bomber.h"
+#include "../include/Bot.h"
 #include "../include/Plazma.h"
 #include "../include/Devastator.h"
 
 SpaceInvaders::SpaceInvaders() :
-	m_wave(1u),
+	m_wave(nullptr),
 	m_isSfx(true),
 	m_isMusic(true)
 {
@@ -58,7 +59,7 @@ void SpaceInvaders::start()
 
 void SpaceInvaders::move_background()
 {
-	const auto speed = static_cast<float>(5. * std::log(1 + m_wave));
+	const auto speed = static_cast<float>(2 * std::log(1 + (m_wave ? m_wave->get_wave_number() : 1)));
 	const auto height = hgui::size(100_em).height;
 	m_backgrounds.first->set_position((m_backgrounds.first->get_position() + hgui::point(0, speed)).undo_responsivness());
 	if (m_backgrounds.first->get_position().y >= height)
@@ -125,6 +126,8 @@ void SpaceInvaders::set_main_menu()
 			if (hgui::TaskManager::is_program(m_backgroundMovingTaskId))
 				hgui::TaskManager::deprogram(m_backgroundMovingTaskId);
 			m_backgroundMovingTaskId = hgui::TaskManager::program(std::chrono::milliseconds(20), [this] { move_background(); });
+			if (m_wave)
+				m_wave->update(true);
 		};
 	callback();
 	m_window->set_size_callback(callback);
@@ -137,13 +140,12 @@ void SpaceInvaders::set_death_menu()
 	const auto menuTexture = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/home.png"));
 	m_buttons.push_back(hgui::ButtonManager::create([this]
 		{
-			m_gameOver->stop();
+			m_wave = nullptr;
 			start();
 		}, hgui::size(10_em).set_reference(hgui::reference::HEIGHT), hgui::point(40_em, 65_em) - hgui::size(5_em).set_reference(hgui::reference::HEIGHT), menuTexture, std::make_tuple(hgui::color("6e738d"), HGUI_COLOR_BLUE, HGUI_COLOR_BLUE), 25.f, false));
 	const auto restartTexture = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/restart.png"));
 	m_buttons.push_back(hgui::ButtonManager::create([this]
 		{
-			m_gameOver->stop();
 			start_game();
 		}, hgui::size(10_em).set_reference(hgui::reference::HEIGHT), hgui::point(50_em, 65_em) - hgui::size(5_em).set_reference(hgui::reference::HEIGHT), restartTexture, std::make_tuple(hgui::color("6e738d"), HGUI_COLOR_BLUE, HGUI_COLOR_BLUE), 25.f, false));
 	const auto exitTexture = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/exit.png"));
@@ -155,10 +157,12 @@ void SpaceInvaders::start_game()
 	hgui::TagManager::set_current_tag("game");
 	hgui::CursorManager::hide();
 	m_player = std::make_shared<Laser>();
+	m_wave = std::make_unique<Wave>(m_font);
 	hgui::Renderer::set_draw_callback([this]
 		{
 			if (m_player && !m_player->is_alive())
 			{
+				m_wave->stop();
 				m_gameOver->loop();
 				hgui::CursorManager::reveal();
 				hgui::kernel::Widget::active({"death_menu"});

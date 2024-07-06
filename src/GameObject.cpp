@@ -28,6 +28,11 @@ bool GameObject::is_in_window() const
 	return collisionX && collisionY;
 }
 
+GameObject::hitbox& GameObject::get_hitbox()
+{
+	return m_hitbox;
+}
+
 const GameObject::hitbox& GameObject::get_hitbox() const
 {
 	return m_hitbox;

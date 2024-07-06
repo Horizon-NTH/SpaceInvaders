@@ -1,18 +1,16 @@
 #include "../include/Player.h"
 #include "../include/Shot.h"
 
-Player::Player(const std::string& shipName, const std::shared_ptr<hgui::kernel::Image>& shipImage, const unsigned health, const unsigned shield, const unsigned level, const std::tuple<damage, ammo, cooldown>& weaponStats) :
-	SpaceShip(shipName, hitbox(hgui::MouseManager::get_position() - hgui::point(2.5_em).set_reference(hgui::reference::HEIGHT), hgui::size(5_em).set_reference(hgui::reference::HEIGHT)), shipImage, health, shield, level, weaponStats)
+Player::Player(const std::string& shipName, const unsigned health, const unsigned shield, const unsigned level, const std::tuple<damage, ammo, cooldown>& weaponStats) :
+	SpaceShip(shipName, hitbox(hgui::MouseManager::get_position() - hgui::point(2.5_em).set_reference(hgui::reference::HEIGHT), hgui::size(5_em).set_reference(hgui::reference::HEIGHT)), health, shield, level, weaponStats)
 {
 	set_health();
-	move();
 	hgui::MouseManager::bind(hgui::MouseAction(hgui::buttons::LEFT, hgui::actions::PRESS), [this]
 		{
 			if (!m_reloading->is_playing())
 			{
 				if (shoot())
-					return;
-				m_reloading->play();
+					m_reloading->play();
 			}
 		});
 	const auto gif = hgui::gif_loader("assets/textures/reloading.gif");
@@ -21,6 +19,7 @@ Player::Player(const std::string& shipName, const std::shared_ptr<hgui::kernel::
 	const float ratio = gif->get_size().width / gif->get_size().height;
 	m_reloading = hgui::SpriteManager::create(gif, hgui::size(5_em * ratio, 5_em), hgui::point(100_em) - hgui::point(3.5_em * ratio, 5_em));
 	m_reloading->play();
+	Player::move();
 }
 
 void Player::take_damage()
@@ -28,8 +27,6 @@ void Player::take_damage()
 	SpaceShip::take_damage();
 	if (is_alive())
 		set_health();
-	else
-		destroy();
 }
 
 void Player::move()
@@ -68,7 +65,7 @@ void Player::destroy()
 	const auto gif = hgui::gif_loader("assets/textures/explosions/explosion_player.gif");
 	const auto explosion = hgui::SpriteManager::create(gif, size, position);
 	explosion->play();
-	hgui::kernel::GIFData::delay totalDelay = {};
+	hgui::kernel::GIFData::delay totalDelay(100);
 	for (const auto& delay : gif->get_data().pixels | std::views::values)
 		totalDelay += delay;
 	hgui::TaskManager::program(totalDelay, [explosion] {});

@@ -7,7 +7,7 @@
 class SpaceShip::Shot : public GameObject
 {
 public:
-	Shot(const hitbox& hitbox, const std::shared_ptr<hgui::kernel::Image>& shotImage, const GameObject::hitbox& damageHitbox, const hgui::point& position, const hgui::vec2& velocity);
+	Shot(const hitbox& hitbox, const std::shared_ptr<hgui::kernel::Image>& shotImage, GameObject::hitbox damageHitbox, hgui::point position, const hgui::vec2& velocity);
 	~Shot() override;
 
 	[[nodiscard]] bool is_destroyed() const;
@@ -15,6 +15,7 @@ public:
 protected:
 	void destroy();
 	virtual void has_collide() = 0;
+	virtual bool can_damaged(const std::weak_ptr<Entity>& entity);
 	virtual void collide();
 
 	std::shared_ptr<hgui::kernel::Sprite> m_texture;

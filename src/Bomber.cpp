@@ -2,8 +2,7 @@
 #include "../include/BomberShot.h"
 
 Bomber::Bomber() :
-	Player("bomber", hgui::image_loader("assets/textures/spaceships/bomber.gif"), 3u, 0u, 1u,
-		std::make_tuple(1u, 1u, std::make_pair(std::chrono::milliseconds(2000), hgui::Timer())))
+	Player("bomber", 3u, 0u, 1u, std::make_tuple(1u, 1u, std::make_pair(std::chrono::milliseconds(2000), hgui::Timer())))
 {
 }
 
