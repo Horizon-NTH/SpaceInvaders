@@ -9,6 +9,10 @@ class Devastator final : public Player
 
 public:
 	Devastator();
+	explicit Devastator(const Player& player);
 
 	bool shoot() override;
+
+private:
+	void level_up() override;
 };

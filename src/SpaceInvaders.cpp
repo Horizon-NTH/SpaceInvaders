@@ -1,9 +1,9 @@
 #include "../include/SpaceInvaders.h"
 #include "../include/Laser.h"
-#include "../include/Bomber.h"
-#include "../include/Bot.h"
 #include "../include/Plazma.h"
+#include "../include/Bomber.h"
 #include "../include/Devastator.h"
+#include "../include/Upgrade.h"
 
 SpaceInvaders::SpaceInvaders() :
 	m_wave(nullptr),
@@ -157,6 +157,10 @@ void SpaceInvaders::start_game()
 	hgui::TagManager::set_current_tag("game");
 	hgui::CursorManager::hide();
 	m_player = std::make_shared<Laser>();
+	Upgrade<Laser>::m_player = &m_player;
+	Upgrade<Plazma>::m_player = &m_player;
+	Upgrade<Bomber>::m_player = &m_player;
+	Upgrade<Devastator>::m_player = &m_player;
 	m_wave = std::make_unique<Wave>(m_font);
 	hgui::Renderer::set_draw_callback([this]
 		{

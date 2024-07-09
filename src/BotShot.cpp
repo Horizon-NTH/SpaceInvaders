@@ -1,7 +1,7 @@
 #include "../include/BotShot.h"
 
-Bot::Shot::Shot(const std::shared_ptr<hgui::kernel::Image>& image, const hitbox& hitbox, const hgui::point& position, const unsigned level) :
-	SpaceShip::Shot(hitbox, image, hitbox, position, hgui::vec2(0)),
+Bot::Shot::Shot(const std::shared_ptr<hgui::kernel::Image>& image, const hitbox& hitbox, const damage damage, const unsigned level) :
+	SpaceShip::Shot(hitbox, image, hitbox, damage, hgui::vec2(0)),
 	m_level(std::clamp(level, 1u, 3u))
 {
 	m_velocity = hgui::vec2(0, static_cast<float>(m_level * 5));
@@ -9,7 +9,12 @@ Bot::Shot::Shot(const std::shared_ptr<hgui::kernel::Image>& image, const hitbox&
 
 bool Bot::Shot::can_damaged(const std::weak_ptr<Entity>& entity)
 {
-	return !static_cast<bool>(std::dynamic_pointer_cast<Bot>(entity.lock()));
+	if (const auto bot = std::dynamic_pointer_cast<Bot>(entity.lock()))
+	{
+		bot->set_protection_shield();
+		return false;
+	}
+	return true;
 }
 
 void Bot::Shot::has_collide()

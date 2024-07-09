@@ -3,8 +3,12 @@
 #include "Include.h"
 #include "GameObject.h"
 
+class PowerUp;
+
 class Entity : public GameObject, public std::enable_shared_from_this<Entity>
 {
+	friend PowerUp;
+
 public:
 	explicit Entity(const hitbox& hitbox);
 	~Entity() override;

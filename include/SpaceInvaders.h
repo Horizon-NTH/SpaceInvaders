@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Include.h"
-#include "SpaceShip.h"
 #include "Wave.h"
+
+class Player;
 
 class SpaceInvaders
 {
@@ -24,7 +25,7 @@ private:
 	std::shared_ptr<hgui::kernel::AnimatedSprite> m_gameOver;
 	std::string m_backgroundMovingTaskId;
 
-	std::shared_ptr<SpaceShip> m_player;
+	std::shared_ptr<Player> m_player;
 	std::unique_ptr<Wave> m_wave;
 	bool m_isSfx;
 	bool m_isMusic;

@@ -19,7 +19,6 @@ public:
 	void take_damage() override;
 	[[nodiscard]] bool is_alive() const override;
 	void make_invincible(const std::chrono::seconds& duration);
-
 	unsigned get_level() const;
 
 protected:

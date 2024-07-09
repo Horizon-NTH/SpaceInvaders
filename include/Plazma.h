@@ -9,6 +9,10 @@ class Plazma final : public Player
 
 public:
 	Plazma();
+	explicit Plazma(const Player& player);
 
 	bool shoot() override;
+
+private:
+	void level_up() override;
 };

@@ -19,7 +19,15 @@ Player::Player(const std::string& shipName, const unsigned health, const unsigne
 	const float ratio = gif->get_size().width / gif->get_size().height;
 	m_reloading = hgui::SpriteManager::create(gif, hgui::size(5_em * ratio, 5_em), hgui::point(100_em) - hgui::point(3.5_em * ratio, 5_em));
 	m_reloading->play();
-	Player::move();
+	m_level = 0u;
+	while (m_level < level)
+		Player::level_up();
+	m_tempID = hgui::TaskManager::program(std::chrono::milliseconds(20), [this] { move(); });
+}
+
+Player::Player(const Player& player, const std::string& shipName, const std::tuple<damage, ammo, cooldown>& weaponStats) :
+	Player(shipName, player.m_health, player.m_shield, player.m_level, weaponStats)
+{
 }
 
 void Player::take_damage()
@@ -27,6 +35,52 @@ void Player::take_damage()
 	SpaceShip::take_damage();
 	if (is_alive())
 		set_health();
+}
+
+void Player::level_up()
+{
+	m_level = std::min(++m_level, 3u);
+	const auto image = hgui::image_loader("assets/textures/level/" + std::to_string(m_level) + ".png");
+	const float aspectRatio = image->get_size().width / image->get_size().height;
+	const hgui::size size = hgui::size(10_em).set_reference(hgui::reference::HEIGHT) * aspectRatio;
+	m_levelTexture = hgui::SpriteManager::create(image, size, hgui::point());
+	m_levelTexture->set_position(hgui::point(0, 100_em - size.em_height));
+}
+
+void Player::heal(const bool full)
+{
+	if (full)
+		m_health = 3u;
+	else
+		m_health = std::min(++m_health, 3u);
+	set_health();
+}
+
+void Player::shield_up(const bool full)
+{
+	if (full)
+		m_shield = 3u;
+	else
+		m_shield = std::min(++m_shield, 3u);
+	set_health();
+}
+
+unsigned int Player::get_health() const
+{
+	return m_health;
+}
+
+unsigned int Player::get_shield() const
+{
+	return m_shield;
+}
+
+void Player::stop()
+{
+	if (hgui::TaskManager::is_program(m_tempID))
+		hgui::TaskManager::deprogram(m_tempID);
+	if (hgui::MouseManager::is_bind(hgui::MouseAction(hgui::buttons::LEFT, hgui::actions::PRESS)))
+		hgui::MouseManager::unbind(hgui::MouseAction(hgui::buttons::LEFT, hgui::actions::PRESS));
 }
 
 void Player::move()
@@ -56,10 +110,8 @@ void Player::destroy()
 	m_shipTexture = nullptr;
 	m_healthTexture = nullptr;
 	m_reloading = nullptr;
-	if (hgui::TaskManager::is_program(m_tempID))
-		hgui::TaskManager::deprogram(m_tempID);
-	if (hgui::MouseManager::is_bind(hgui::MouseAction(hgui::buttons::LEFT, hgui::actions::PRESS)))
-		hgui::MouseManager::unbind(hgui::MouseAction(hgui::buttons::LEFT, hgui::actions::PRESS));
+	m_levelTexture = nullptr;
+	stop();
 	const auto size = hgui::size(10_em).set_reference(hgui::reference::HEIGHT);
 	const auto position = m_hitbox.first + m_hitbox.second / 2 - size / 2;
 	const auto gif = hgui::gif_loader("assets/textures/explosions/explosion_player.gif");

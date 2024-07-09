@@ -1,7 +1,7 @@
 #include "../include/BomberShot.h"
 
-Bomber::Shot::Shot(const std::shared_ptr<hgui::kernel::Image>& image, const hitbox& hitbox, const hgui::point& position, const unsigned level) :
-	SpaceShip::Shot(hitbox, image, std::make_pair(hitbox.first - level * hitbox.second / 2., (level + 1) * hitbox.second), position, hgui::vec2(0)),
+Bomber::Shot::Shot(const std::shared_ptr<hgui::kernel::Image>& image, const hitbox& hitbox, const damage damage, const unsigned level) :
+	SpaceShip::Shot(hitbox, image, std::make_pair(hitbox.first - level * hitbox.second / 2., 2 * (level + 1) * hitbox.second), damage, hgui::vec2(0)),
 	m_level(std::clamp(level, 1u, 3u))
 {
 	m_velocity = hgui::vec2(0, -static_cast<float>(m_level * 2));

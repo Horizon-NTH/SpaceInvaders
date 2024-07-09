@@ -8,6 +8,10 @@ class Laser final : public Player
 
 public:
 	Laser();
+	explicit Laser(const Player& player);
 
 	bool shoot() override;
+
+private:
+	void level_up() override;
 };

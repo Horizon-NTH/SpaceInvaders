@@ -1,14 +1,12 @@
-#include <utility>
-
 #include "../include/Shot.h"
 #include "../include/Player.h"
 
-SpaceShip::Shot::Shot(const hitbox& hitbox, const std::shared_ptr<hgui::kernel::Image>& shotImage, GameObject::hitbox damageHitbox, hgui::point position, const hgui::vec2& velocity):
+SpaceShip::Shot::Shot(const hitbox& hitbox, const std::shared_ptr<hgui::kernel::Image>& shotImage, GameObject::hitbox damageHitbox, const damage damage, const hgui::vec2& velocity):
 	GameObject(hitbox),
 	m_texture(nullptr),
 	m_damageHitbox(std::move(damageHitbox)),
-	m_position(std::move(position)),
-	m_velocity(velocity)
+	m_velocity(velocity),
+	m_damage(damage)
 {
 	m_texture = hgui::SpriteManager::create(shotImage, m_hitbox.second, m_hitbox.first);
 	m_tempID = hgui::TaskManager::program(std::chrono::milliseconds(20), [this] { move(); });
@@ -30,8 +28,8 @@ void SpaceShip::Shot::move()
 		destroy();
 	if (m_texture)
 	{
-		m_position += m_velocity;
 		m_hitbox.first += m_velocity;
+		m_damageHitbox.first += m_velocity;
 		m_texture->set_position(m_hitbox.first);
 		m_tempID = hgui::TaskManager::program(std::chrono::milliseconds(20), [this] { move(); });
 		collide();
@@ -45,19 +43,25 @@ bool SpaceShip::Shot::can_damaged(const std::weak_ptr<Entity>& entity)
 
 void SpaceShip::Shot::collide()
 {
-	std::vector<std::weak_ptr<Entity>> damagedEntities;
-	std::ranges::copy_if(m_gameEntities, std::back_inserter(damagedEntities), [&](const std::weak_ptr<Entity>& ptr)
+	if (std::ranges::any_of(m_gameEntities, [&](const std::weak_ptr<Entity>& ptr)
 		{
 			if (const auto entity = ptr.lock(); entity && entity->is_alive())
 				return entity->is_overlapping(m_hitbox);
 			return false;
-		});
-	if (!damagedEntities.empty())
+		}))
 	{
+		std::vector<std::weak_ptr<Entity>> damagedEntities;
+		std::ranges::copy_if(m_gameEntities, std::back_inserter(damagedEntities), [&](const std::weak_ptr<Entity>& ptr)
+			{
+				if (const auto entity = ptr.lock(); entity && entity->is_alive())
+					return entity->is_overlapping(m_damageHitbox);
+				return false;
+			});
 		for (const auto& ptr : damagedEntities)
 		{
 			if (const auto entity = ptr.lock(); entity && can_damaged(entity))
-				entity->take_damage();
+				for (int i = 0; i < m_damage; i++)
+					entity->take_damage();
 		}
 		has_collide();
 	}

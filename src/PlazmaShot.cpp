@@ -1,7 +1,7 @@
 #include  "../include/PlazmaShot.h"
 
-Plazma::Shot::Shot(const std::shared_ptr<hgui::kernel::Image>& image, const hitbox& hitbox, const hgui::point& position, const unsigned level) :
-	SpaceShip::Shot(hitbox, image, hitbox, position, hgui::vec2(0)),
+Plazma::Shot::Shot(const std::shared_ptr<hgui::kernel::Image>& image, const hitbox& hitbox, const damage damage, const unsigned level) :
+	SpaceShip::Shot(hitbox, image, hitbox, damage, hgui::vec2(0)),
 	m_level(std::clamp(level, 1u, 3u))
 {
 	m_velocity = hgui::vec2(0, -static_cast<float>(m_level * 3));

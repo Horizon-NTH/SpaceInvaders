@@ -13,16 +13,19 @@ Bot::Bot(const hgui::point& position, const unsigned level, const bool shielded,
 		make_invincible(std::chrono::seconds(10));
 	}
 	get_random_velocity();
-	Bot::move();
-	m_shotTempID = hgui::TaskManager::program(std::get<2>(m_weaponStats).first, [this] { shoot(); });
+	m_tempID = hgui::TaskManager::program(std::chrono::milliseconds(20), [this] { move(); });
+	m_tempIDs.at(0) = hgui::TaskManager::program(std::get<2>(m_weaponStats).first, [this] { shoot(); });
 }
 
 Bot::~Bot()
 {
+	std::ranges::for_each(m_tempIDs, [](const auto& tempID)
+		{
+			if (hgui::TaskManager::is_program(tempID))
+				hgui::TaskManager::deprogram(tempID);
+		});
 	if (hgui::TaskManager::is_program(m_tempID))
 		hgui::TaskManager::deprogram(m_tempID);
-	if (hgui::TaskManager::is_program(m_shotTempID))
-		hgui::TaskManager::deprogram(m_shotTempID);
 }
 
 void Bot::move()
@@ -49,6 +52,8 @@ void Bot::move()
 			m_hitbox.first.update();
 		}
 		m_shipTexture->set_position(m_hitbox.first);
+		if (m_shieldProtection)
+			set_protection_shield(true);
 		m_tempID = hgui::TaskManager::program(std::chrono::milliseconds(20), [this]
 			{
 				move();
@@ -62,7 +67,7 @@ bool Bot::shoot()
 	if (m_shipTexture)
 	{
 		m_shots.erase(std::begin(std::ranges::remove_if(m_shots, [](const std::unique_ptr<SpaceShip::Shot>& shot) { return shot->is_destroyed(); })), m_shots.end());
-		m_shotTempID = hgui::TaskManager::program(std::get<2>(m_weaponStats).first, [this] { shoot(); });
+		m_tempIDs.at(0) = hgui::TaskManager::program(std::get<2>(m_weaponStats).first, [this] { shoot(); });
 		if (m_shots.size() < std::get<1>(m_weaponStats))
 		{
 			auto image = hgui::image_loader(std::string("assets/textures/lasers/laser_") + (m_level == 3u ? "red" : "green") + ".png");
@@ -70,7 +75,7 @@ bool Bot::shoot()
 			const hgui::size size = hgui::size(2_em * ratio, 2_em).set_reference(hgui::reference::HEIGHT);
 			hgui::point position = m_hitbox.first + hgui::point(m_hitbox.second.width / 2.f, m_hitbox.second.height + size.height / 2);
 			hitbox hitbox = std::make_pair(position - size / 2., size);
-			m_shots.emplace_back(std::make_unique<Shot>(image, hitbox, position, m_level));
+			m_shots.emplace_back(std::make_unique<Shot>(image, hitbox, std::get<0>(m_weaponStats), m_level));
 			return true;
 		}
 	}
@@ -80,6 +85,19 @@ bool Bot::shoot()
 const std::vector<std::unique_ptr<SpaceShip::Shot>>& Bot::get_shots()
 {
 	return m_shots;
+}
+
+void Bot::set_protection_shield(const bool setOnlyPosition)
+{
+	const auto size = hgui::size(6_em).set_reference(hgui::reference::HEIGHT);
+	const auto position = m_hitbox.first + m_hitbox.second / 2 - size / 2;
+	if (setOnlyPosition)
+	{
+		m_shieldProtection->set_position(position);
+		return;
+	}
+	m_shieldProtection = hgui::SpriteManager::create(hgui::image_loader("assets/textures/explosions/bot_protection.png"), size, position);
+	m_tempIDs.at(1) = hgui::TaskManager::program(std::chrono::milliseconds(500), [this] { m_shieldProtection = nullptr; });
 }
 
 void Bot::destroy()
