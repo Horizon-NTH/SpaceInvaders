@@ -1,7 +1,8 @@
 #include "../include/Entity.h"
 
-Entity::Entity(const hitbox& hitbox) :
-	GameObject(hitbox)
+Entity::Entity(const hitbox& hitbox, const unsigned health) :
+	GameObject(hitbox),
+	m_health(health)
 {
 	hgui::after(std::chrono::milliseconds{}, [&]
 		{

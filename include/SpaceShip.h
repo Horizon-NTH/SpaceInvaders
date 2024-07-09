@@ -25,7 +25,6 @@ protected:
 	std::shared_ptr<hgui::kernel::Sprite> m_shipTexture;
 	std::vector<std::unique_ptr<Shot>> m_shots;
 
-	unsigned int m_health;
 	unsigned int m_shield;
 	unsigned int m_level;
 	bool m_invincible;

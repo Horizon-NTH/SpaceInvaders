@@ -4,8 +4,7 @@
 #include "../include/Shot.h"
 
 SpaceShip::SpaceShip(std::string name, const hitbox& hitbox, const unsigned int health, const unsigned int shield, const unsigned int level, const std::tuple<damage, ammo, cooldown>& weaponStats) :
-	Entity(hitbox),
-	m_health(health),
+	Entity(hitbox, health),
 	m_shield(shield),
 	m_level(level),
 	m_invincible(false),

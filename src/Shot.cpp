@@ -60,7 +60,7 @@ void SpaceShip::Shot::collide()
 		for (const auto& ptr : damagedEntities)
 		{
 			if (const auto entity = ptr.lock(); entity && can_damaged(entity))
-				for (int i = 0; i < m_damage; i++)
+				for (unsigned i = 0; i < m_damage; i++)
 					entity->take_damage();
 		}
 		has_collide();

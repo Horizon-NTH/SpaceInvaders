@@ -21,7 +21,6 @@ protected:
 	std::shared_ptr<hgui::kernel::Sprite> m_texture;
 
 	hitbox m_damageHitbox;
-	hgui::point m_position;
 	hgui::vec2 m_velocity;
 	unsigned m_damage;
 

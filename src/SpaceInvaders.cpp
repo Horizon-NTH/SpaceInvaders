@@ -51,7 +51,6 @@ void SpaceInvaders::start()
 			}
 		};
 	hgui::KeyBoardManager::bind_key_callback(start);
-
 	hgui::kernel::Widget::active({"main_menu"});
 	hgui::Renderer::draw({"background", "main_menu"});
 	hgui::Renderer::loop();
