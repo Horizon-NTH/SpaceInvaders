@@ -8,6 +8,12 @@
 
 **SpaceInvaders** is a game inspired by the famous [arcade game](https://en.wikipedia.org/wiki/Space_Invaders).
 
+![Game main menu](/assets/screenshots/main_menu.png)
+
+![In game screenshot](/assets/screenshots/in_game_screenshots.png)
+
+![Game over menu](/assets/screenshots/game_over_menu.png)
+
 ## Installation Instructions
 
 > You can also simply install a pre-built version [here](https://github.com/Horizon-NTH/SpaceInvaders/releases).
@@ -54,7 +60,7 @@ This command will create the executable in the main folder.
 
 ## Documentation
 
-To learn how this application work and all the possibilities , please refer to
+To learn how this game work and all the possibilities, please refer to
 the [wiki](https://github.com/Horizon-NTH/SpaceInvaders/wiki).
 
 ## Dependencies
