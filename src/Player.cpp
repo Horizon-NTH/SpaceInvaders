@@ -121,4 +121,10 @@ void Player::destroy()
 	for (const auto& delay : gif->get_data().pixels | std::views::values)
 		totalDelay += delay;
 	hgui::TaskManager::program(totalDelay, [explosion] {});
+	if (*m_isSfx)
+	{
+		const auto deathSound = hgui::SoundPlayerManager::create(hgui::audio_loader("assets/sfx/player_explode.wav"));
+		deathSound->play();
+		hgui::TaskManager::program(std::chrono::milliseconds(2000), [deathSound] {});
+	}
 }

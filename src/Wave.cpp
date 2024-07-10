@@ -16,12 +16,13 @@
 #include "../include/Plazma.h"
 #include "../include/Meteor.h"
 
-Wave::Wave(const std::shared_ptr<hgui::kernel::Font>& font) :
+Wave::Wave(const std::shared_ptr<hgui::kernel::Font>& font, const bool isSFX) :
 	m_waveNumber(1u),
 	m_spawnedMeteors(0u),
 	m_score(0u),
 	m_font(font),
-	m_tempIDs({"", "", ""})
+	m_tempIDs({"", "", ""}),
+	m_isSfx(isSFX)
 {
 	m_labels = {
 				hgui::LabelManager::create("Wave: 1", hgui::point(), font),
@@ -31,6 +32,7 @@ Wave::Wave(const std::shared_ptr<hgui::kernel::Font>& font) :
 		{
 			m_tempIDs.push_back(hgui::TaskManager::program(std::chrono::milliseconds{1000}, [=, this, points = bot->get_level() * 100, hitbox = bot->get_hitbox()] { show_point(hitbox, points); }));
 		};
+	m_waveSound = hgui::SoundPlayerManager::create(hgui::audio_loader("assets/sfx/battle_alarm.wav"));
 	update(true);
 	generate_wave();
 	check_wave_status();
@@ -38,6 +40,7 @@ Wave::Wave(const std::shared_ptr<hgui::kernel::Font>& font) :
 
 Wave::~Wave()
 {
+	m_isSfx = false;
 	stop();
 }
 
@@ -69,12 +72,15 @@ void Wave::stop()
 			if (hgui::TaskManager::is_program(tempID))
 				hgui::TaskManager::deprogram(tempID);
 		});
-
+	if (m_isSfx)
+		m_waveSound->stop();
 	m_labels.erase(std::ranges::remove_if(m_labels, [](const auto& label) { return label->get_text().substr(0, 5) == "Wave "; }).begin(), m_labels.end());
 }
 
 void Wave::generate_wave()
 {
+	if (m_isSfx)
+		m_waveSound->play();
 	if (!(m_waveNumber % 10))
 	{
 		m_spawnedMeteors = 0u;
@@ -96,7 +102,11 @@ void Wave::generate_wave()
 	waveTitle->set_height(static_cast<unsigned int>(hgui::size(5_em).height));
 	waveTitle->set_position(hgui::point(50_em) - waveTitle->get_size() / 2.f);
 	m_labels.push_back(waveTitle);
-	m_tempIDs.at(0) = hgui::TaskManager::program(std::chrono::milliseconds(1000), [this, waveTitle] { m_labels.erase(std::ranges::find(m_labels, waveTitle)); });
+	m_tempIDs.at(0) = hgui::TaskManager::program(std::chrono::milliseconds(2000), [this, waveTitle]
+		{
+			m_waveSound->stop();
+			m_labels.erase(std::ranges::find(m_labels, waveTitle));
+		});
 }
 
 void Wave::check_wave_status()

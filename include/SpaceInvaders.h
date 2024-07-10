@@ -16,6 +16,9 @@ private:
 	std::shared_ptr<hgui::kernel::Window> m_window;
 	std::shared_ptr<hgui::kernel::Monitor> m_monitor;
 	std::shared_ptr<hgui::kernel::Font> m_font;
+	std::shared_ptr<hgui::kernel::SoundPlayer> m_menuMusic;
+	std::shared_ptr<hgui::kernel::SoundPlayer> m_gameMusic;
+	std::shared_ptr<hgui::kernel::SoundPlayer> m_clickSound;
 
 	std::pair<std::shared_ptr<hgui::kernel::Sprite>, std::shared_ptr<hgui::kernel::Sprite>> m_backgrounds;
 	std::pair<std::shared_ptr<hgui::kernel::Texture>, std::shared_ptr<hgui::kernel::Texture>> m_sfx;

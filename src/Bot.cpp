@@ -115,6 +115,12 @@ void Bot::destroy()
 	for (const auto& delay : gif->get_data().pixels | std::views::values)
 		totalDelay += delay;
 	hgui::TaskManager::program(totalDelay, [explosion] {});
+	if (*m_isSfx)
+	{
+		const auto deathSound = hgui::SoundPlayerManager::create(hgui::audio_loader("assets/sfx/ennemi_explode.wav"));
+		deathSound->play();
+		hgui::TaskManager::program(std::chrono::milliseconds(2000), [deathSound] {});
+	}
 	if (m_onDeath)
 		m_onDeath(std::dynamic_pointer_cast<Bot>(shared_from_this()));
 }

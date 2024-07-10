@@ -10,7 +10,7 @@ class PowerUp;
 class Wave final
 {
 public:
-	explicit Wave(const std::shared_ptr<hgui::kernel::Font>& font);
+	explicit Wave(const std::shared_ptr<hgui::kernel::Font>& font, bool isSfx);
 	~Wave();
 
 	[[nodiscard]] unsigned get_wave_number() const;
@@ -27,10 +27,12 @@ private:
 	std::vector<std::shared_ptr<PowerUp>> m_powerUps;
 	std::vector<std::shared_ptr<Bot>> m_shotsToKeepAlive;
 	std::vector<std::shared_ptr<hgui::kernel::Label>> m_labels;
+	std::shared_ptr<hgui::kernel::SoundPlayer> m_waveSound;
 	std::shared_ptr<hgui::kernel::Font> m_font;
 	std::vector<std::string> m_tempIDs;
 	std::array<std::array<std::uniform_real_distribution<float>, 2>, 4> m_spawnRanges;
 	std::function<void(const std::shared_ptr<Bot>&)> m_onBotDeath;
+	bool m_isSfx;
 
 	void generate_wave();
 	void check_wave_status();

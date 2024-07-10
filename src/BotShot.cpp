@@ -1,10 +1,12 @@
 #include "../include/BotShot.h"
 
 Bot::Shot::Shot(const std::shared_ptr<hgui::kernel::Image>& image, const hitbox& hitbox, const damage damage, const unsigned level) :
-	SpaceShip::Shot(hitbox, image, hitbox, damage, hgui::vec2(0)),
+	SpaceShip::Shot(hitbox, image, hitbox, damage, hgui::vec2(0),
+		hgui::SoundPlayerManager::create(hgui::audio_loader("assets/sfx/laser.wav"))),
 	m_level(std::clamp(level, 1u, 3u))
 {
 	m_velocity = hgui::vec2(0, static_cast<float>(m_level * 5));
+	m_shotSound->set_volume(0.2);
 }
 
 bool Bot::Shot::can_damaged(const std::weak_ptr<Entity>& entity)

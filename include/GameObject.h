@@ -16,6 +16,8 @@ public:
 	[[nodiscard]] hitbox& get_hitbox();
 	[[nodiscard]] const hitbox& get_hitbox() const;
 
+	static inline bool* m_isSfx;
+
 protected:
 	hitbox m_hitbox;
 	std::string m_tempID;

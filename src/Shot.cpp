@@ -1,14 +1,17 @@
 #include "../include/Shot.h"
 #include "../include/Player.h"
 
-SpaceShip::Shot::Shot(const hitbox& hitbox, const std::shared_ptr<hgui::kernel::Image>& shotImage, GameObject::hitbox damageHitbox, const damage damage, const hgui::vec2& velocity):
+SpaceShip::Shot::Shot(const hitbox& hitbox, const std::shared_ptr<hgui::kernel::Image>& shotImage, GameObject::hitbox damageHitbox, const damage damage, const hgui::vec2& velocity, const std::shared_ptr<hgui::kernel::SoundPlayer>& shotSound) :
 	GameObject(hitbox),
 	m_texture(nullptr),
+	m_shotSound(shotSound),
 	m_damageHitbox(std::move(damageHitbox)),
 	m_velocity(velocity),
 	m_damage(damage)
 {
 	m_texture = hgui::SpriteManager::create(shotImage, m_hitbox.second, m_hitbox.first);
+	if (*m_isSfx)
+		m_shotSound->play();
 	m_tempID = hgui::TaskManager::program(std::chrono::milliseconds(20), [this] { move(); });
 }
 

@@ -1,7 +1,8 @@
 #include "../include/DevastatorShot.h"
 
 Devastator::Shot::Shot(const std::shared_ptr<hgui::kernel::Image>& image, const hitbox& hitbox, const damage damage, const unsigned level) :
-	SpaceShip::Shot(hitbox, image, hitbox, damage, hgui::vec2(0, -1)),
+	SpaceShip::Shot(hitbox, image, hitbox, damage, hgui::vec2(0, -1),
+		hgui::SoundPlayerManager::create(hgui::audio_loader("assets/sfx/devastator.wav"))),
 	m_level(std::clamp(level, 1u, 3u))
 {
 	hgui::TaskManager::program(std::chrono::milliseconds(1000 * level), [this] { destroy(); });

@@ -31,6 +31,9 @@ SpaceInvaders::SpaceInvaders() :
 	m_sfx.second = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/sfx_off.png"));
 	m_music.first = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/music_on.png"));
 	m_music.second = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/music_off.png"));
+	m_menuMusic = hgui::SoundPlayerManager::create(hgui::audio_loader("assets/sfx/music.wav"));
+	m_gameMusic = hgui::SoundPlayerManager::create(hgui::audio_loader("assets/sfx/sound.wav"));
+	m_clickSound = hgui::SoundPlayerManager::create(hgui::audio_loader("assets/sfx/click.wav"));
 	//Load Font
 	m_font = hgui::FontManager::create("assets/fonts/space_age.ttf");
 	//Binding
@@ -47,9 +50,19 @@ void SpaceInvaders::start()
 			if (action == hgui::actions::PRESS && key != hgui::keys::ESCAPE)
 			{
 				hgui::KeyBoardManager::bind_key_callback([] {});
+				if (m_isMusic)
+				{
+					m_menuMusic->stop();
+					m_gameMusic->loop();
+					m_gameMusic->set_volume(0.75f);
+				}
+				if (m_isSfx)
+					m_clickSound->play();
 				start_game();
 			}
 		};
+	if (m_isMusic)
+		m_menuMusic->loop();
 	hgui::KeyBoardManager::bind_key_callback(start);
 	hgui::kernel::Widget::active({"main_menu"});
 	hgui::Renderer::draw({"background", "main_menu"});
@@ -99,6 +112,10 @@ void SpaceInvaders::set_main_menu()
 	const auto musicSwitch = [=, this]
 		{
 			m_isMusic = !m_isMusic;
+			if (m_isMusic)
+				m_menuMusic->play();
+			else
+				m_menuMusic->pause();
 			music->set_texture(m_isMusic ? m_music.first : m_music.second);
 		};
 	music->set_function(musicSwitch);
@@ -140,12 +157,14 @@ void SpaceInvaders::set_death_menu()
 	m_buttons.push_back(hgui::ButtonManager::create([this]
 		{
 			m_wave = nullptr;
-			start();
+			m_gameMusic->stop();
 		}, hgui::size(10_em).set_reference(hgui::reference::HEIGHT), hgui::point(40_em, 65_em) - hgui::size(5_em).set_reference(hgui::reference::HEIGHT), menuTexture, std::make_tuple(hgui::color("6e738d"), HGUI_COLOR_BLUE, HGUI_COLOR_BLUE), 25.f, false));
 	const auto restartTexture = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/restart.png"));
 	m_buttons.push_back(hgui::ButtonManager::create([this]
 		{
 			start_game();
+			if (m_isSfx)
+				m_clickSound->play();
 		}, hgui::size(10_em).set_reference(hgui::reference::HEIGHT), hgui::point(50_em, 65_em) - hgui::size(5_em).set_reference(hgui::reference::HEIGHT), restartTexture, std::make_tuple(hgui::color("6e738d"), HGUI_COLOR_BLUE, HGUI_COLOR_BLUE), 25.f, false));
 	const auto exitTexture = hgui::TextureManager::create(hgui::image_loader("assets/textures/icons/exit.png"));
 	m_buttons.push_back(hgui::ButtonManager::create(hgui::end, hgui::size(10_em).set_reference(hgui::reference::HEIGHT), hgui::point(60_em, 65_em) - hgui::size(5_em).set_reference(hgui::reference::HEIGHT), exitTexture, std::make_tuple(hgui::color("6e738d"), HGUI_COLOR_BLUE, HGUI_COLOR_BLUE), 25.f, false));
@@ -160,7 +179,8 @@ void SpaceInvaders::start_game()
 	Upgrade<Plazma>::m_player = &m_player;
 	Upgrade<Bomber>::m_player = &m_player;
 	Upgrade<Devastator>::m_player = &m_player;
-	m_wave = std::make_unique<Wave>(m_font);
+	GameObject::m_isSfx = &m_isSfx;
+	m_wave = std::make_unique<Wave>(m_font, m_isSfx);
 	hgui::Renderer::set_draw_callback([this]
 		{
 			if (m_player && !m_player->is_alive())
